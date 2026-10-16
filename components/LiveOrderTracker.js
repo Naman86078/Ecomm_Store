@@ -612,17 +612,6 @@ function OrderTrackerView({ order, onClose, onOrderUpdate }) {
                 <span suppressHydrationWarning className="tracking-wider text-xs font-black text-neutral-900">
                   {currentStep === 4 ? "VERIFIED ✓" : deliveryOtp}
                 </span>
-                {isAdmin && currentStep < 4 && (
-                  <button
-                    onClick={regenerateOtp}
-                    title="Change OTP (Admin Only)"
-                    className="p-0.5 text-neutral-400 hover:text-emerald-600 transition"
-                  >
-                    <svg className="w-3 h-3 hover:rotate-180 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </button>
-                )}
               </div>
             </div>
           </div>
