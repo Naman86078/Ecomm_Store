@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#18181b" />
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="45%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Rounded App Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" stroke="#27272a" stroke-width="6" />
+
+  <!-- Shopping Bag Handle -->
+  <path d="M 200 175 C 200 115, 312 115, 312 175" fill="none" stroke="url(#brandGrad)" stroke-width="26" stroke-linecap="round" filter="url(#glow)" />
+
+  <!-- Outer Bag Outline -->
+  <path d="M 144 200 L 180 415 L 332 415 L 368 200 Z" fill="none" stroke="url(#brandGrad)" stroke-width="24" stroke-linejoin="round" stroke-linecap="round" opacity="0.35" />
+
+  <!-- Bold Neon N Monogram -->
+  <path d="M 184 395 L 184 235 L 328 395 L 328 235" fill="none" stroke="url(#brandGrad)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />
+</svg>

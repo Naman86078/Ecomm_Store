@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="ogBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09090b" />
+      <stop offset="50%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#052e16" />
+    </linearGradient>
+
+    <!-- Brand Vibrant Gradient -->
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <!-- Card Background -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#09090b" stop-opacity="0.9" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="40" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Deep Canvas Background -->
+  <rect width="1200" height="630" fill="url(#ogBg)" />
+
+  <!-- Neon Atmosphere Blobs -->
+  <circle cx="200" cy="180" r="160" fill="#10b981" opacity="0.12" filter="url(#glow)" />
+  <circle cx="1050" cy="450" r="220" fill="#6366f1" opacity="0.15" filter="url(#glow)" />
+  <circle cx="650" cy="100" r="140" fill="#06b6d4" opacity="0.08" filter="url(#glow)" />
+
+  <!-- Subtle Blueprint Grid -->
+  <g stroke="#27272a" stroke-width="1" opacity="0.4">
+    <line x1="100" y1="0" x2="100" y2="630" />
+    <line x1="300" y1="0" x2="300" y2="630" />
+    <line x1="500" y1="0" x2="500" y2="630" />
+    <line x1="700" y1="0" x2="700" y2="630" />
+    <line x1="900" y1="0" x2="900" y2="630" />
+    <line x1="1100" y1="0" x2="1100" y2="630" />
+    <line x1="0" y1="150" x2="1200" y2="150" />
+    <line x1="0" y1="300" x2="1200" y2="300" />
+    <line x1="0" y1="450" x2="1200" y2="450" />
+  </g>
+
+  <!-- Inner Frame -->
+  <rect x="60" y="50" width="1080" height="530" rx="36" fill="url(#cardBg)" stroke="#27272a" stroke-width="2" />
+
+  <!-- Logo Icon Container -->
+  <g transform="translate(110, 110)">
+    <rect width="90" height="90" rx="24" fill="#047857" opacity="0.2" />
+    <rect width="90" height="90" rx="24" fill="none" stroke="url(#brandGrad)" stroke-width="3" filter="url(#subtleGlow)" />
+    <text x="45" y="60" font-family="system-ui, -apple-system, sans-serif" font-size="44" text-anchor="middle">🛍️</text>
+  </g>
+
+  <!-- Brand Typography -->
+  <text x="225" y="152" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="46" fill="#ffffff" letter-spacing="-1">
+    NovaStore
+  </text>
+  <text x="225" y="185" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#34d399" letter-spacing="3">
+    HYPERLOCAL E-COMMERCE &amp; FLEET DISPATCH
+  </text>
+
+  <!-- Status Live Badge -->
+  <g transform="translate(930, 115)">
+    <rect width="160" height="40" rx="20" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <circle cx="25" cy="20" r="5" fill="#34d399" />
+    <text x="40" y="25" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="12" fill="#a7f3d0" letter-spacing="1">LIVE GPS FLEET</text>
+  </g>
+
+  <!-- Main Headline -->
+  <text x="110" y="295" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#ffffff" letter-spacing="-1.5">
+    Lightning-Fast Deliveries,
+  </text>
+  <text x="110" y="360" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="url(#brandGrad)" letter-spacing="-1.5">
+    Tracked Live to Your Door.
+  </text>
+
+  <!-- Subheadline -->
+  <text x="110" y="420" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="20" fill="#a1a1aa">
+    Real-time street GPS telemetry, dynamic delivery zones &amp; 1-click Stripe payments.
+  </text>
+
+  <!-- Feature Pills -->
+  <g transform="translate(110, 475)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="220" height="44" rx="14" fill="#27272a" stroke="#3f3f46" stroke-width="1" />
+    <text x="20" y="27" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#e4e4e7">🛵 Real-Time Rider Fleet</text>
+
+    <!-- Pill 2 -->
+    <rect x="235" y="0" width="235" height="44" rx="14" fill="#27272a" stroke="#3f3f46" stroke-width="1" />
+    <text x="255" y="27" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#e4e4e7">🗺️ Dynamic Polygon Zones</text>
+
+    <!-- Pill 3 -->
+    <rect x="485" y="0" width="210" height="44" rx="14" fill="#27272a" stroke="#3f3f46" stroke-width="1" />
+    <text x="505" y="27" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#e4e4e7">💳 Stripe 1-Click Pay</text>
+  </g>
+</svg>
