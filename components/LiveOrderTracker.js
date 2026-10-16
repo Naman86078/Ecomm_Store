@@ -102,18 +102,6 @@ function OrderTrackerView({ order, onClose, onOrderUpdate }) {
   }, [order?.deliveryStatus, order?.orderNumber]);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [activeCallModal, setActiveCallModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    try {
-      const adminToken = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
-      const user = userStr ? JSON.parse(userStr) : null;
-      if (adminToken || user?.role === "admin") {
-        setIsAdmin(true);
-      }
-    } catch {}
-  }, []);
 
   // Dynamic Delivery OTP (SSR-safe initialization to prevent hydration mismatch)
   const [deliveryOtp, setDeliveryOtp] = useState("----");
@@ -490,111 +478,6 @@ function OrderTrackerView({ order, onClose, onOrderUpdate }) {
     return () => clearInterval(timer);
   }, [currentStep, progressRatio, etaMinutes, orderNumber, orderMeta.waypoints]);
 
-  // Reset Simulation specifically for testing this order
-  const handleReset = () => {
-    try {
-      localStorage.removeItem(storageKey);
-      localStorage.removeItem(`novastore_otp_${orderNumber}`);
-    } catch {}
-    regenerateOtp();
-    stepTicksRef.current = 0;
-    setCurrentStep(1);
-    setProgressRatio(0);
-    setEtaMinutes(18);
-    setRiderCoords(orderMeta.waypoints[0]);
-
-    // Persist reset back to MongoDB
-    fetch("/api/orders", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderNumber,
-        deliveryStatus: "pending",
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && onOrderUpdate) {
-          onOrderUpdate(data.order);
-        }
-      })
-      .catch((err) => console.error("Error resetting order:", err));
-  };
-
-  // Jump to next phase
-  const handleNextPhase = () => {
-    if (currentStep >= 4) return;
-    const nextSt = currentStep + 1;
-    let nextRt = 0;
-    let coords = orderMeta.waypoints[0];
-    let eta = 18;
-
-    if (nextSt === 2) {
-      // Step 2: Preparing at store - rider stays stationary at store hub
-      nextRt = 0;
-      coords = orderMeta.waypoints[0];
-      eta = 15;
-    } else if (nextSt === 3) {
-      // Step 3: Out for delivery - rider leaves store hub and begins transit
-      nextRt = 0.08;
-      coords = getCoordinatesAtRatio(0.08, orderMeta.waypoints);
-      eta = 12;
-    } else if (nextSt === 4) {
-      // Step 4: Delivered
-      nextRt = 1.0;
-      coords = orderMeta.waypoints[orderMeta.waypoints.length - 1];
-      eta = 0;
-    }
-
-    let newOtp = deliveryOtp;
-    if (nextSt === 3) {
-      newOtp = String(Math.floor(1000 + Math.random() * 9000));
-      setDeliveryOtp(newOtp);
-      try {
-        localStorage.setItem(`novastore_otp_${orderNumber}`, newOtp);
-      } catch {}
-    }
-
-    const payload = {
-      type: "TELEMETRY_UPDATE",
-      orderNumber,
-      step: nextSt,
-      progress: nextRt,
-      eta,
-      coords,
-      otp: newOtp,
-    };
-
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(payload));
-    }
-
-    // Persist deliveryStatus to MongoDB Order Schema
-    const statusMap = {
-      1: "pending",
-      2: "assigned",
-      3: "out_for_delivery",
-      4: "delivered",
-    };
-    const nextDeliveryStatus = statusMap[nextSt] || "pending";
-
-    fetch("/api/orders", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderNumber,
-        deliveryStatus: nextDeliveryStatus,
-        deliveryOtp: newOtp,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && onOrderUpdate) {
-          onOrderUpdate(data.order);
-        }
-      })
-      .catch((err) => console.error("Error updating order deliveryStatus:", err));
-  };
 
   // Overall display progress for top progress bar (Zomato/Swiggy style)
   const overallProgress = useMemo(() => {
@@ -667,26 +550,9 @@ function OrderTrackerView({ order, onClose, onOrderUpdate }) {
             Socket: {wsStatus}
           </span>
 
-          {isAdmin ? (
-            <>
-              <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-xl">
-                🛡️ Admin Dispatch
-              </span>
-
-              {currentStep < 4 && (
-                <button
-                  onClick={handleNextPhase}
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold shadow-sm transition"
-                >
-                  Advance Phase &rarr;
-                </button>
-              )}
-            </>
-          ) : (
-            <span className="text-[11px] text-emerald-300/80 font-medium bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
-              ● Live Tracking Active
-            </span>
-          )}
+          <span className="text-[11px] text-emerald-300/80 font-medium bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
+            ● Live Tracking Active
+          </span>
         </div>
       </div>
 

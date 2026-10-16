@@ -146,21 +146,36 @@ async function seedProducts() {
   }
 
   console.log("Connecting to MongoDB...");
-  await mongoose.connect(process.env.MONGODB_URI);
-  console.log("Connected successfully!");
+  await mongoose.connect(process.env.MONGODB_URI, {
+    dbName: "ecomm_stripe",
+  });
+  console.log("Connected successfully to ecomm_stripe!");
 
   try {
     await Product.collection.createIndex({ location: "2dsphere" });
   } catch {}
 
-  const count = await Product.countDocuments();
-  if (count > 0) {
-    console.log(`ℹ️ Products already exist (${count} items). Skipping re-seed.`);
-    process.exit(0);
+  let addedCount = 0;
+  let skippedCount = 0;
+
+  for (const item of sampleProducts) {
+    const existing = await Product.findOne({ title: item.title });
+    if (!existing) {
+      await Product.create(item);
+      console.log(`✓ Added product: "${item.title}"`);
+      addedCount++;
+    } else {
+      skippedCount++;
+    }
   }
 
-  await Product.insertMany(sampleProducts);
-  console.log(`✅ Successfully seeded ${sampleProducts.length} sample products!`);
+  const total = await Product.countDocuments();
+  console.log(`\n===========================================`);
+  console.log(`✅ Seed Finished!`);
+  console.log(`• New products added: ${addedCount}`);
+  console.log(`• Already existing: ${skippedCount}`);
+  console.log(`• Total products in database: ${total}`);
+  console.log(`===========================================`);
   process.exit(0);
 }
 

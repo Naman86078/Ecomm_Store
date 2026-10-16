@@ -11,7 +11,8 @@
     "seed:zones": "node scripts/seedDeliveryZones.js",
     "seed:riders": "node scripts/seedRiders.js",
     "seed:products": "node scripts/seedProducts.js",
-    "seed:all": "node scripts/seedDeliveryZones.js && node scripts/seedRiders.js && node scripts/createAdmin.js && node scripts/seedProducts.js"
+    "seed:all": "node scripts/seedDeliveryZones.js && node scripts/seedRiders.js && node scripts/createAdmin.js && node scripts/seedProducts.js",
+    "migrate:local": "node scripts/migrateLocalToAtlas.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
