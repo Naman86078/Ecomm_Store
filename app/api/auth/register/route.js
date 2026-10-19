@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { sendSignupEmail } from "@/lib/nodemailer";
+import { scheduleDelayedSignupEmail } from "@/lib/nodemailer";
 
 export async function POST(request) {
   try {
@@ -33,11 +33,11 @@ export async function POST(request) {
       password: hashedPassword,
     });
 
-    try {
-      await sendSignupEmail({ email: newUser.email, name: newUser.name });
-    } catch (mailError) {
-      console.warn("Failed to send welcome email:", mailError.message);
-    }
+    // Schedule Thank You for Registration email after 5 minutes (300,000 ms)
+    scheduleDelayedSignupEmail(
+      { email: newUser.email, name: newUser.name },
+      5 * 60 * 1000
+    );
 
     return NextResponse.json(
       {

@@ -36,6 +36,7 @@ export async function POST(request) {
       orderNumber,
       reason: reason || "Cancelled by customer request",
       refundAmount,
+      refundStripeId: body.refundStripeId,
     });
 
     return NextResponse.json({

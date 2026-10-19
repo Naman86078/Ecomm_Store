@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/models/Order";
 import Rider from "@/models/Rider";
+import { sendOrderStatusEmail } from "@/lib/nodemailer";
 
 // GET /api/rider/orders?riderId=...
 export async function GET(request) {
@@ -102,6 +103,17 @@ export async function PATCH(request) {
       rider.status = "busy";
       await rider.save();
 
+      // Automatically inform customer that rider was assigned
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus: "assigned",
+        riderName: rider.name,
+        riderPhone: rider.phone,
+        deliveryAddress: order.deliveryAddress,
+      }).catch((err) => console.warn("[AutoMail] Assigned email failed:", err.message));
+
       return NextResponse.json({
         success: true,
         message: `Order #${orderNumber} accepted successfully!`,
@@ -114,6 +126,18 @@ export async function PATCH(request) {
       // Mark as Out for Delivery
       order.deliveryStatus = "out_for_delivery";
       await order.save();
+
+      // Automatically notify customer order is out for delivery
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus: "out_for_delivery",
+        riderName: rider?.name || order.riderName,
+        riderPhone: rider?.phone || order.riderPhone,
+        deliveryAddress: order.deliveryAddress,
+        deliveryOtp: order.deliveryOtp,
+      }).catch((err) => console.warn("[AutoMail] Out for delivery email failed:", err.message));
 
       return NextResponse.json({
         success: true,
@@ -141,6 +165,17 @@ export async function PATCH(request) {
       const tripEarning = Math.round((order.deliveryCharge || 40) + 35);
       rider.todayEarnings = (rider.todayEarnings || 0) + tripEarning;
       await rider.save();
+
+      // Automatically notify customer order is delivered
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus: "delivered",
+        riderName: rider?.name || order.riderName,
+        riderPhone: rider?.phone || order.riderPhone,
+        deliveryAddress: order.deliveryAddress,
+      }).catch((err) => console.warn("[AutoMail] Delivered email failed:", err.message));
 
       return NextResponse.json({
         success: true,

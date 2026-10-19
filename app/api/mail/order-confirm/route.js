@@ -36,7 +36,11 @@ export async function POST(request) {
       name,
       orderNumber,
       items: items || [],
+      subtotal: body.subtotal,
+      deliveryCharge: body.deliveryCharge,
       totalAmount: totalAmount || 0,
+      deliveryAddress: body.deliveryAddress,
+      deliveryZone: body.deliveryZone,
     });
 
     return NextResponse.json({

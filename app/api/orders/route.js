@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/models/Order";
 import Rider from "@/models/Rider";
+import { sendOrderStatusEmail, sendOrderCancellationEmail } from "@/lib/nodemailer";
 
 // GET /api/orders?email=... or ?orderNumber=... or ?admin=true or ?deliveryStatus=... or ?riderId=...
 export async function GET(request) {
@@ -136,6 +137,28 @@ export async function PATCH(request) {
     }
 
     await order.save();
+
+    // Automatically dispatch email notification to customer
+    if (deliveryStatus === "cancelled") {
+      sendOrderCancellationEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        reason: "Order has been cancelled",
+        refundAmount: order.totalAmount,
+      }).catch((err) => console.warn("[AutoMail] Order cancel email error:", err.message));
+    } else if (["out_for_delivery", "delivered", "assigned"].includes(deliveryStatus)) {
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus,
+        riderName: order.riderName,
+        riderPhone: order.riderPhone,
+        deliveryAddress: order.deliveryAddress,
+        deliveryOtp: order.deliveryOtp,
+      }).catch((err) => console.warn("[AutoMail] Order status email error:", err.message));
+    }
 
     // Synchronize the Rider model in MongoDB
     const targetRiderCode = order.riderCode || riderCode;

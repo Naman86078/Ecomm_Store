@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/models/Order";
+import { sendOrderCancellationEmail } from "@/lib/nodemailer";
 
 // GET /api/admin/refunds
 // Admin views all orders and refund requests
@@ -116,6 +117,16 @@ export async function POST(request) {
     order.refundedAt = new Date();
     order.refundStripeId = refundId;
     await order.save();
+
+    // Automatically notify customer via email
+    sendOrderCancellationEmail({
+      email: order.customerEmail,
+      name: order.customerName,
+      orderNumber: order.orderNumber,
+      reason: order.refundReason || "Customer refund request approved by administrator",
+      refundAmount: order.totalAmount,
+      refundStripeId: refundId,
+    }).catch((err) => console.warn("[AutoMail] Refund email failed:", err.message));
 
     return NextResponse.json({
       success: true,

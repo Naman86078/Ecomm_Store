@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Rider from "@/models/Rider";
 import Order from "@/models/Order";
 import { createToken } from "@/lib/auth";
+import { sendOrderStatusEmail, sendOrderCancellationEmail } from "@/lib/nodemailer";
 
 // GET /api/admin/riders
 export async function GET(request) {
@@ -91,6 +92,17 @@ export async function POST(request) {
       rider.status = "busy";
       await rider.save();
 
+      // Automatically inform customer rider assigned
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus: "assigned",
+        riderName: rider.name,
+        riderPhone: rider.phone,
+        deliveryAddress: order.deliveryAddress,
+      }).catch((err) => console.warn("[AutoMail] Admin assign email error:", err.message));
+
       return NextResponse.json({
         success: true,
         message: `Order #${orderNumber} assigned to ${rider.name} (${rider.riderId})`,
@@ -126,6 +138,17 @@ export async function POST(request) {
         }
       }
 
+      // Automatically notify customer order delivered
+      sendOrderStatusEmail({
+        email: order.customerEmail,
+        name: order.customerName,
+        orderNumber: order.orderNumber,
+        deliveryStatus: "delivered",
+        riderName: order.riderName,
+        riderPhone: order.riderPhone,
+        deliveryAddress: order.deliveryAddress,
+      }).catch((err) => console.warn("[AutoMail] Admin mark delivered email error:", err.message));
+
       return NextResponse.json({
         success: true,
         message: `Order #${orderNumber} marked as Delivered!`,
@@ -150,6 +173,28 @@ export async function POST(request) {
         order.assignedAt = new Date();
       }
       await order.save();
+
+      // Automatically dispatch notification to customer
+      if (deliveryStatus === "cancelled") {
+        sendOrderCancellationEmail({
+          email: order.customerEmail,
+          name: order.customerName,
+          orderNumber: order.orderNumber,
+          reason: "Order status updated to cancelled by administrator",
+          refundAmount: order.totalAmount,
+        }).catch((err) => console.warn("[AutoMail] Admin cancel status email error:", err.message));
+      } else if (["out_for_delivery", "delivered", "assigned"].includes(deliveryStatus)) {
+        sendOrderStatusEmail({
+          email: order.customerEmail,
+          name: order.customerName,
+          orderNumber: order.orderNumber,
+          deliveryStatus,
+          riderName: order.riderName,
+          riderPhone: order.riderPhone,
+          deliveryAddress: order.deliveryAddress,
+          deliveryOtp: order.deliveryOtp,
+        }).catch((err) => console.warn("[AutoMail] Admin status update email error:", err.message));
+      }
 
       return NextResponse.json({
         success: true,

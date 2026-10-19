@@ -7,6 +7,7 @@ import {
   isPointInPolygon,
   pickBestDeliveryZone,
 } from "@/lib/geoUtils";
+import { sendOrderConfirmationEmail } from "@/lib/nodemailer";
 
 export async function POST(request) {
   try {
@@ -162,6 +163,20 @@ export async function POST(request) {
     const host = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
+    const triggerConfirmationEmail = () => {
+      sendOrderConfirmationEmail({
+        email: customerEmail,
+        name: customerName,
+        orderNumber,
+        items,
+        subtotal,
+        deliveryCharge,
+        totalAmount,
+        deliveryAddress: deliveryAddressSnapshot,
+        deliveryZone: deliveryZoneSnapshot,
+      }).catch((err) => console.warn("[AutoMail] Confirmation email error:", err.message));
+    };
+
     // Check if user has configured an active Stripe Secret Key
     const isMockStripe = !stripeSecretKey || stripeSecretKey.includes("placeholder");
 
@@ -188,6 +203,9 @@ export async function POST(request) {
         stripeSessionId: demoSessionId,
         status: "paid",
       });
+
+      // Automatically dispatch order confirmation email
+      triggerConfirmationEmail();
 
       return NextResponse.json({
         success: true,
@@ -270,6 +288,9 @@ export async function POST(request) {
         status: "paid",
       });
 
+      // Automatically dispatch order confirmation email
+      triggerConfirmationEmail();
+
       checkoutUrl = session.url;
     } catch (sdkError) {
       // Fallback directly to Stripe REST API using native fetch
@@ -326,6 +347,9 @@ export async function POST(request) {
         stripeSessionId: stripeData.id || "",
         status: "paid",
       });
+
+      // Automatically dispatch order confirmation email
+      triggerConfirmationEmail();
 
       checkoutUrl = stripeData.url;
     }

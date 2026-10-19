@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/models/Order";
+import { sendRefundRequestEmail } from "@/lib/nodemailer";
 
 // POST /api/orders/refund
 // Customer calls this to request a refund when a product is wrong or defective
@@ -54,6 +55,16 @@ export async function POST(request) {
     order.refundRequestedAt = new Date();
 
     await order.save();
+
+    // Automatically send confirmation email to customer
+    sendRefundRequestEmail({
+      email: order.customerEmail,
+      name: order.customerName,
+      orderNumber: order.orderNumber,
+      reason: refundReason,
+      notes: refundNotes,
+      totalAmount: order.totalAmount,
+    }).catch((err) => console.warn("[AutoMail] Refund request email error:", err.message));
 
     return NextResponse.json({
       success: true,
